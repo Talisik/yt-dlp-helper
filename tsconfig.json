@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "NodeNext",
+        // "moduleResolution": "nodenext",
+        "declaration": true,
+        // "allowJs": true,
+        "outDir": "./dist",
+        "strict": true,
+        // "checkJs": true
+        "paths": {
+            "undici-types": [
+                "./node_modules/undici-types/index.d.ts"
+            ]
+            // "tree-kill": ["./node_modules/tree-kill/index.d.ts"]
+        }
+    },
+    "include": ["src/**/*"]
+    // "include": ["*.js"] // Adjust the pattern to include your JS files
+}
