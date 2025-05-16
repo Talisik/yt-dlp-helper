@@ -1,33 +1,30 @@
-# YT-DLP Helper #
+# YT-DLP Helper
 
-Helps you with YT-DLP stuff.
+Helps you with YT-DLP stuff. A TypeScript wrapper for yt-dlp that simplifies video downloading from YouTube and other supported platforms.
 
-## Installation ##
-
-1. Install the package.
+## Installation
 
 ```sh
-npm install github:Talisik/yt-dlp-helper
+npm install yt-dlp-helper
 ```
 
-## How to Use ##
+## How to Use
 
-### Quick Start ###
+### Quick Start
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
     const controller = await YTDLP.download({
         args: {
-          url: 'https://www.youtube.com/watch?v=PHMTfx3gWqw',
-          output: "path/to/filename",
-          audioFormat: "mp3"
-        }
+            url: "https://www.youtube.com/watch?v=PHMTfx3gWqw",
+            output: "path/to/filename",
+            audioFormat: "mp3",
+        },
     });
 
-    for await (const chunk of controller.listen())
-        console.log(chunk);
+    for await (const chunk of controller.listen()) console.log(chunk);
 })();
 ```
 
@@ -35,72 +32,82 @@ Sample `chunk`.
 
 ```json
 {
-  "status": "downloading",
-  "downloaded_bytes": 1354043,
-  "total_bytes": 1354043,
-  "tmpfilename": "The Oldeelva River on the outskirts of Olden, Norway. #norway  #cruisenorwegian #cruiseship [PHMTfx3gWqw].f140.m4a.part",
-  "filename": "The Oldeelva River on the outskirts of Olden, Norway. #norway  #cruisenorwegian #cruiseship [PHMTfx3gWqw].f140.m4a",
-  "eta": 0,
-  "speed": 8148429.533646017,
-  "elapsed": 0.2281484603881836,
-  "ctx_id": null,
-  "_eta_str": "00:00",
-  "_speed_str": "   7.77MiB/s",
-  "_percent_str": "100.0%",
-  "_total_bytes_str": "   1.29MiB",
-  "_total_bytes_estimate_str": "       N/A",
-  "_downloaded_bytes_str": "   1.29MiB",
-  "_elapsed_str": "00:00:00",
-  "_default_template": "100.0% of    1.29MiB at    7.77MiB/s ETA 00:00"
+    "status": "downloading",
+    "downloaded_bytes": 1354043,
+    "total_bytes": 1354043,
+    "tmpfilename": "The Oldeelva River on the outskirts of Olden, Norway. #norway  #cruisenorwegian #cruiseship [PHMTfx3gWqw].f140.m4a.part",
+    "filename": "The Oldeelva River on the outskirts of Olden, Norway. #norway  #cruisenorwegian #cruiseship [PHMTfx3gWqw].f140.m4a",
+    "eta": 0,
+    "speed": 8148429.533646017,
+    "elapsed": 0.2281484603881836,
+    "ctx_id": null,
+    "_eta_str": "00:00",
+    "_speed_str": "   7.77MiB/s",
+    "_percent_str": "100.0%",
+    "_total_bytes_str": "   1.29MiB",
+    "_total_bytes_estimate_str": "       N/A",
+    "_downloaded_bytes_str": "   1.29MiB",
+    "_elapsed_str": "00:00:00",
+    "_default_template": "100.0% of    1.29MiB at    7.77MiB/s ETA 00:00"
 }
 ```
 
-### Downloading the YT-DLP Binary Manually ###
+### Downloading the YT-DLP Binary Manually
 
 You can download the YT-DLP binary through the package.
 This is automatically done when attempting to download a video (can be disabled.)
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
-    await YTDLP.downloadFromGithub();
+    await YTDLP.downloadYTDLP();
 
-    ...
+    // Now you can use other functions
 })();
 ```
 
-### Retrieving Terminals via ID ###
+### Downloading FFmpeg Binary Manually
+
+You can download the FFmpeg binary through the package.
+This is automatically done when attempting to download a video (can be disabled.)
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    await YTDLP.downloadFFmpeg();
+
+    // Now you can use other functions
+})();
+```
+
+### Retrieving Terminals via ID
+
+```js
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
     async function newController() {
         const controller = await YTDLP.download({
             args: {
-              url: 'https://www.youtube.com/watch?v=PHMTfx3gWqw',
-              output: "path/to/filename",
-            }
+                url: "https://www.youtube.com/watch?v=PHMTfx3gWqw",
+                output: "path/to/filename",
+            },
         });
 
-        if (controller == null)
-            return;
+        if (controller == null) return;
 
         return controller.id;
     }
 
     const id = await newController();
 
-    if (id == null)
-        return;
+    if (id == null) return;
 
     const controller = YTDLP.Terminal.fromID(id); // The controller can be retrieved with its ID.
 
-    if (controller == null)
-        return;
-
-    let stopping = false;
+    if (controller == null) return;
 
     for await (const chunk of controller.listen()) {
         console.log(chunk);
@@ -108,25 +115,24 @@ import * as YTDLP from 'yt-dlp-helper';
 })();
 ```
 
-### Stopping the Download ###
+### Stopping the Download
 
 The download can be stopped at any time.
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
     const controller = await YTDLP.download({
         args: {
-          url: 'https://www.youtube.com/watch?v=PHMTfx3gWqw',
-          output: "path/to/filename",
-          videoFormat: "597", // The video format ID, found in `.getInfo(...)`.
-          audioFormat: "mp3"
-        }
+            url: "https://www.youtube.com/watch?v=PHMTfx3gWqw",
+            output: "path/to/filename",
+            videoFormat: "597", // The video format ID, found in `.getInfo(...)`.
+            audioFormat: "mp3",
+        },
     });
 
-    if (controller == null)
-        return;
+    if (controller == null) return;
 
     let stopping = false;
 
@@ -141,35 +147,62 @@ import * as YTDLP from 'yt-dlp-helper';
 })();
 ```
 
-### Rate Limiting ###
+### Rate Limiting
 
 Download speed can be rate-limited.
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
     const controller = await YTDLP.download({
         args: {
-          url: 'https://www.youtube.com/watch?v=PHMTfx3gWqw',
-          outputFilepath: "path/to/filename",
-          videoFormat: "597",
-          audioFormat: "mp3",
-          limitRate: "50K" // B = Bytes, K = KiB, M = MiB, G = GiB
-        }
+            url: "https://www.youtube.com/watch?v=PHMTfx3gWqw",
+            output: "path/to/filename",
+            videoFormat: "597",
+            audioFormat: "mp3",
+            limitRate: "50K", // B = Bytes, K = KiB, M = MiB, G = GiB
+        },
     });
 
-    ...
+    // Listen for progress updates
 })();
 ```
 
-### Retrieving Video Information ###
+### Configuration Options
+
+You can control the download behavior with configuration options:
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
-    const info = await YTDLP.getInfo('https://www.youtube.com/watch?v=Qe9U1XzX36s');
+    const controller = await YTDLP.download({
+        args: {
+            url: "https://www.youtube.com/watch?v=PHMTfx3gWqw",
+            output: "path/to/filename",
+        },
+        downloadBinary: {
+            ytdlp: true, // Auto-download yt-dlp binary if missing
+            ffmpeg: true, // Auto-download ffmpeg binary if missing
+        },
+        ytdlpDownloadDestination: "./custom/path", // Optional custom path for yt-dlp
+        ffmpegDownloadDestination: "./custom/path", // Optional custom path for ffmpeg
+    });
+
+    // Process updates
+})();
+```
+
+### Retrieving Video Information
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    const info = await YTDLP.getInfo(
+        "https://www.youtube.com/watch?v=Qe9U1XzX36s"
+    );
 
     console.log(info);
 })();
@@ -274,14 +307,14 @@ Sample Result:
 }
 ```
 
-### Retrieving Playlist Information ###
+### Retrieving Playlist Information
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
     const info = await YTDLP.getPlaylistInfo({
-      url: 'https://www.youtube.com/watch?v=Qe9U1XzX36s&list=PLQxjZBFrSfLAMKZKcgPzBjplN8iLtBN8c'
+        url: "https://www.youtube.com/watch?v=Qe9U1XzX36s&list=PLQxjZBFrSfLAMKZKcgPzBjplN8iLtBN8c",
     });
 
     console.log(info);
@@ -360,21 +393,20 @@ Sample Result:
 }
 ```
 
-### Manually Invoking the YT-DLP Binary ###
+### Manually Invoking the YT-DLP Binary
 
 You can invoke YT-DLP with your own set of arguments.
 
-The data returned is YT-DLP's logs,
-not the downloaded file.
+The data returned is YT-DLP's logs, not the downloaded file.
 
 Note that in this method, there is no progress update.
 
 ```js
-import * as YTDLP from 'yt-dlp-helper';
+import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
     const info = await YTDLP.invoke({
-      url: 'https://www.youtube.com/watch?v=PHMTfx3gWqw'
+        args: ["--dump-json", "https://www.youtube.com/watch?v=PHMTfx3gWqw"],
     });
 
     console.log(info);
@@ -391,3 +423,17 @@ Sample Result:
   data: [string],
 }
 ```
+
+### Download Arguments Reference
+
+The `args` parameter for the `download` function accepts the following options:
+
+| Parameter    | Type   | Description                                            |
+| ------------ | ------ | ------------------------------------------------------ |
+| url          | string | The URL of the video to be processed                   |
+| output       | string | The path to save the output file                       |
+| videoFormat  | string | The format of the video to be downloaded               |
+| audioFormat  | string | The format of the audio to be extracted (e.g., "mp3")  |
+| audioQuality | string | Quality of the extracted audio (0-10, where 0 is best) |
+| remuxVideo   | string | Format to remux the video to (e.g., "mp4", "webm")     |
+| limitRate    | string | Maximum download rate (e.g., "50K" or "4.2M")          |
