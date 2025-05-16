@@ -1,18 +1,18 @@
 import {
     DOWNLOAD_PROGRESS_RE,
     ALREADY_DOWNLOADED_RE,
-} from './helpers/constants.js';
-import { getArgs, linuxPatch } from './helpers/utils.js';
+} from "./helpers/constants.js";
+import { getArgs, linuxPatch } from "./helpers/utils.js";
 import {
     downloadFFmpeg,
     getFFmpegLocation,
-} from './helpers/ffmpeg-downloader.js';
-import { Terminal } from './helpers/terminal.js';
-import { Args } from './interfaces/args.js';
+} from "./helpers/ffmpeg-downloader.js";
+import { Terminal } from "./helpers/terminal.js";
+import { Args } from "./interfaces/args.js";
 import {
     downloadYTDLP,
     getYTDLPFilePath,
-} from './helpers/yt-dlp-downloader.js';
+} from "./helpers/yt-dlp-downloader.js";
 
 /**
  * Invokes yt-dlp with the given arguments and options.
@@ -43,26 +43,30 @@ async function invokeInternal({
     ytdlpDownloadDestination: string;
     ffmpegDownloadDestination?: string;
     args: string[];
-    downloadBinary: boolean;
+    downloadBinary: {
+        ytdlp: boolean;
+        ffmpeg: boolean;
+    };
     valueSelector?: (text: string) => {
         stop?: boolean;
         data?: any;
     } | null;
 }): Promise<Terminal | null> {
-    if (downloadBinary) {
+    if (downloadBinary.ytdlp) {
         await downloadYTDLP({
             filePath: ytdlpDownloadDestination,
         });
+    }
 
+    if (downloadBinary.ffmpeg) {
         await downloadFFmpeg({
-            destination: ffmpegDownloadDestination || '.',
+            destination: ffmpegDownloadDestination || ".",
         });
     }
 
     const ffmpegPath = getFFmpegLocation();
 
-    if (ffmpegPath)
-        args = ['--ffmpeg-location', ffmpegPath, ...args];
+    if (ffmpegPath) args = ["--ffmpeg-location", ffmpegPath, ...args];
 
     return await Terminal.new({
         command: ytdlpDownloadDestination,
@@ -88,7 +92,7 @@ export async function getInfo(
     url: string
 ): Promise<{ ok: boolean; data?: any }> {
     const { data, ok } = await invoke({
-        args: [url, '--no-warnings', '--dump-json'],
+        args: [url, "--no-warnings", "--dump-json"],
     });
 
     if (!ok)
@@ -98,7 +102,7 @@ export async function getInfo(
 
     return {
         ok,
-        data: JSON.parse(data || ''),
+        data: JSON.parse(data || ""),
     };
 }
 
@@ -122,23 +126,27 @@ export async function getPlaylistInfo({
     url,
     ytdlpDownloadDestination,
     ffmpegDownloadDestination,
-    downloadBinary = true,
+    downloadBinary = {
+        ytdlp: false,
+        ffmpeg: true,
+    },
 }: {
     url: string;
     ytdlpDownloadDestination?: string;
     ffmpegDownloadDestination?: string;
-    downloadBinary?: boolean;
+    downloadBinary?: {
+        ytdlp: boolean;
+        ffmpeg: boolean;
+    };
 }): Promise<{ ok: boolean; data?: any }> {
-    ytdlpDownloadDestination = getYTDLPFilePath(
-        ytdlpDownloadDestination
-    );
+    ytdlpDownloadDestination = getYTDLPFilePath(ytdlpDownloadDestination);
 
     await linuxPatch(ytdlpDownloadDestination);
 
     const terminal = await invokeInternal({
         ytdlpDownloadDestination,
         ffmpegDownloadDestination,
-        args: ['--flat-playlist', '-J', url],
+        args: ["--flat-playlist", "-J", url],
         downloadBinary,
     });
 
@@ -210,17 +218,21 @@ function downloadValueSelector(text: string) {
 export async function download({
     args,
     ytdlpDownloadDestination,
-    ffmpegDownloadDestination = '.',
-    downloadBinary = true,
+    ffmpegDownloadDestination = ".",
+    downloadBinary = {
+        ytdlp: false,
+        ffmpeg: true,
+    },
 }: {
     args: Args;
     ytdlpDownloadDestination?: string;
     ffmpegDownloadDestination?: string;
-    downloadBinary?: boolean;
+    downloadBinary?: {
+        ytdlp: boolean;
+        ffmpeg: boolean;
+    };
 }): Promise<Terminal | null> {
-    ytdlpDownloadDestination = getYTDLPFilePath(
-        ytdlpDownloadDestination
-    );
+    ytdlpDownloadDestination = getYTDLPFilePath(ytdlpDownloadDestination);
 
     await linuxPatch(ytdlpDownloadDestination);
 
@@ -256,18 +268,22 @@ export async function download({
  */
 export async function invoke({
     ytdlpDownloadDestination,
-    ffmpegDownloadDestination = '.',
+    ffmpegDownloadDestination = ".",
     args = [],
-    downloadBinary = true,
+    downloadBinary = {
+        ytdlp: false,
+        ffmpeg: true,
+    },
 }: {
     ytdlpDownloadDestination?: string;
     ffmpegDownloadDestination?: string;
     args?: string[];
-    downloadBinary?: boolean;
+    downloadBinary?: {
+        ytdlp: boolean;
+        ffmpeg: boolean;
+    };
 }): Promise<{ data?: string; exitCode?: number; ok: boolean }> {
-    ytdlpDownloadDestination = getYTDLPFilePath(
-        ytdlpDownloadDestination
-    );
+    ytdlpDownloadDestination = getYTDLPFilePath(ytdlpDownloadDestination);
 
     await linuxPatch(ytdlpDownloadDestination);
 
@@ -284,7 +300,7 @@ export async function invoke({
         };
     }
 
-    let data = '';
+    let data = "";
 
     for await (const text of terminal.listen()) {
         data += text;
