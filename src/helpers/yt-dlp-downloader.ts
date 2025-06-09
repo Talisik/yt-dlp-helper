@@ -148,12 +148,12 @@ async function downloadFile(
  */
 export async function downloadYTDLP({
     filePath = null,
-    version = undefined,
+    version = null,
     platform = os.platform(),
     forceDownload = false,
 }: {
     filePath?: string | null;
-    version?: string | undefined;
+    version?: string | null;
     platform?: NodeJS.Platform;
     forceDownload?: boolean;
 } = {}): Promise<void> {
