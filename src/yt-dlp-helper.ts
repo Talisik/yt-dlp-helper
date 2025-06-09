@@ -12,6 +12,7 @@ import { Args } from "./interfaces/args.js";
 import {
     downloadYTDLP,
     getYTDLPFilePath,
+    getLatestYTDLPVersion,
 } from "./helpers/yt-dlp-downloader.js";
 
 /**
@@ -104,6 +105,80 @@ export async function getInfo(
         ok,
         data: JSON.parse(data || ""),
     };
+}
+
+/**
+ * Manually downloads the latest yt-dlp.exe from the official GitHub repository.
+ * This function forces a download of the latest version, regardless of whether
+ * yt-dlp is already present or up to date.
+ *
+ * @param {Object} [options] - The options for the function.
+ * @param {string} [options.filePath] - The path to save the executable to.
+ * Defaults to "./yt-dlp.exe" on Windows or platform-specific filename.
+ * @param {string} [options.platform] - The platform to download the executable for.
+ * Defaults to the current platform.
+ *
+ * @returns {Promise<{ok: boolean, message: string}>} - A promise that resolves with
+ * an object indicating whether the download was successful and a message.
+ */
+export async function manualDownloadLatestYTDLP({
+    filePath,
+    platform,
+}: {
+    filePath?: string;
+    platform?: NodeJS.Platform;
+} = {}): Promise<{ ok: boolean; message: string }> {
+    try {
+        await downloadYTDLP({
+            filePath,
+            platform,
+            forceDownload: true, // Force download latest version
+        });
+        
+        return {
+            ok: true,
+            message: "Successfully downloaded the latest yt-dlp executable.",
+        };
+    } catch (error) {
+        return {
+            ok: false,
+            message: `Failed to download yt-dlp: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+    }
+}
+
+/**
+ * Checks the latest available version of yt-dlp from the official GitHub repository.
+ *
+ * @returns {Promise<{ok: boolean, version?: string, message: string}>} - A promise that resolves with
+ * an object indicating success, the latest version (if found), and a message.
+ */
+export async function getLatestYTDLPVersionFromGitHub(): Promise<{
+    ok: boolean;
+    version?: string;
+    message: string;
+}> {
+    try {
+        const version = await getLatestYTDLPVersion();
+        
+        if (version) {
+            return {
+                ok: true,
+                version,
+                message: `Latest yt-dlp version: ${version}`,
+            };
+        } else {
+            return {
+                ok: false,
+                message: "Unable to retrieve the latest yt-dlp version from GitHub.",
+            };
+        }
+    } catch (error) {
+        return {
+            ok: false,
+            message: `Error retrieving latest yt-dlp version: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        };
+    }
 }
 
 /**

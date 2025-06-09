@@ -301,6 +301,27 @@ function getYTDLPFileName(
 }
 
 /**
+ * Retrieves the latest version of yt-dlp from the GitHub releases API.
+ *
+ * @returns {Promise<string | null>} - A promise that resolves to the latest version string
+ * of yt-dlp if successful, or null if an error occurred.
+ */
+export async function getLatestYTDLPVersion(): Promise<string | null> {
+    try {
+        const releases = await getGithubReleases(1, 1);
+        if (releases && releases.length > 0) {
+            return releases[0].tag_name.trim();
+        }
+        return null;
+    } catch (error) {
+        if (Config.log) {
+            console.error('Error retrieving latest yt-dlp version:', error);
+        }
+        return null;
+    }
+}
+
+/**
  * Returns the path to the yt-dlp executable.
  *
  * If the binaryFilePath option is not provided, the path is determined by the platform.
