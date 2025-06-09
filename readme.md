@@ -54,16 +54,151 @@ Sample `chunk`.
 
 ### Downloading the YT-DLP Binary Manually
 
-You can download the YT-DLP binary through the package.
+You can download the YT-DLP binary through the package with various configuration options.
 This is automatically done when attempting to download a video (can be disabled.)
+
+#### Basic Usage
 
 ```js
 import * as YTDLP from "yt-dlp-helper";
 
 (async () => {
+    // Download latest version to default location
     await YTDLP.downloadYTDLP();
 
     // Now you can use other functions
+})();
+```
+
+#### Advanced Usage with Options
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    // Download with custom options
+    await YTDLP.downloadYTDLP({
+        filePath: "./custom/path/yt-dlp",      // Custom download path
+        version: "2023.12.30",                // Specific version (optional)
+        platform: "linux",                    // Target platform (auto-detected by default)
+        forceDownload: true                    // Force download even if exists
+    });
+})();
+```
+
+#### Download Options
+
+| Parameter      | Type               | Default                    | Description                                    |
+| -------------- | ------------------ | -------------------------- | ---------------------------------------------- |
+| filePath       | string \| null     | `"./yt-dlp"` or `"./yt-dlp.exe"` | Custom path to save the binary            |
+| version        | string             | Latest version             | Specific version to download (e.g., "2023.12.30") |
+| platform       | NodeJS.Platform    | Current OS platform        | Target platform: "win32", "linux", "darwin", etc. |
+| forceDownload  | boolean            | false                      | Force download even if file already exists    |
+
+### Checking YT-DLP Version
+
+You can check the version of your installed YT-DLP binary or get the latest available version.
+
+#### Get Current Installed Version
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    // Check version of default binary
+    const version = await YTDLP.getYTDLPVersion();
+    
+    if (version) {
+        console.log(`YT-DLP version: ${version}`);
+    } else {
+        console.log("YT-DLP not found or not executable");
+    }
+})();
+```
+
+#### Get Version of Custom Binary Path
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    // Check version of binary at custom path
+    const version = await YTDLP.getYTDLPVersion("./custom/path/yt-dlp");
+    
+    if (version) {
+        console.log(`YT-DLP version: ${version}`);
+    } else {
+        console.log("YT-DLP not found at specified path");
+    }
+})();
+```
+
+#### Get Latest Available Version
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    // Get the latest version available on GitHub
+    const latestVersion = await YTDLP.getLatestYTDLPVersion();
+    
+    if (latestVersion) {
+        console.log(`Latest YT-DLP version: ${latestVersion}`);
+        
+        // Compare with installed version
+        const currentVersion = await YTDLP.getYTDLPVersion();
+        
+        if (currentVersion && currentVersion !== latestVersion) {
+            console.log("Update available!");
+            
+            // Download the latest version
+            await YTDLP.downloadYTDLP({
+                version: latestVersion,
+                forceDownload: true
+            });
+        }
+    } else {
+        console.log("Unable to fetch latest version");
+    }
+})();
+```
+
+#### Version Management Example
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    async function checkAndUpdateYTDLP() {
+        try {
+            const currentVersion = await YTDLP.getYTDLPVersion();
+            const latestVersion = await YTDLP.getLatestYTDLPVersion();
+            
+            if (!currentVersion) {
+                console.log("YT-DLP not found. Downloading latest version...");
+                await YTDLP.downloadYTDLP();
+                return;
+            }
+            
+            console.log(`Current version: ${currentVersion}`);
+            console.log(`Latest version: ${latestVersion}`);
+            
+            if (latestVersion && currentVersion !== latestVersion) {
+                console.log("Updating YT-DLP to latest version...");
+                await YTDLP.downloadYTDLP({
+                    version: latestVersion,
+                    forceDownload: true
+                });
+                console.log("Update completed!");
+            } else {
+                console.log("YT-DLP is up to date!");
+            }
+        } catch (error) {
+            console.error("Error managing YT-DLP version:", error);
+        }
+    }
+    
+    await checkAndUpdateYTDLP();
 })();
 ```
 
