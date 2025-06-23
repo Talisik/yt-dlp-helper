@@ -274,7 +274,7 @@ function downloadValueSelector(text: string) {
     return {
         data: {
             log: text,
-            ...JSON.parse(progress[1])
+            value: JSON.parse(progress[1])
         }
     };
 }
