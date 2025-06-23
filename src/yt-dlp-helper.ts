@@ -277,7 +277,7 @@ function downloadValueSelector(text: string) {
 }
 
 /**
- * Downloads a video from a given URL and returns a controller to manage the download.
+ * Downloads a video from a given URL and returns logs with progress information.
  *
  * The function utilizes the yt-dlp executable to download the video with the specified options.
  * It ensures the necessary binaries are available, downloading them if required.
@@ -288,7 +288,7 @@ function downloadValueSelector(text: string) {
  * @param {string} [options.ffmpegDownloadDestination='.'] - The path to the ffmpeg executable.
  * @param {boolean} [options.downloadBinary=true] - If true, download the executables if not present.
  *
- * @returns {Promise<Terminal | null>} - A promise that resolves to a terminal instance or null.
+ * @returns {Promise<{log: string, value: any | null}>} - A promise that resolves to logs and parsed values.
  */
 export async function download({
     args,
@@ -306,18 +306,37 @@ export async function download({
         ytdlp: boolean;
         ffmpeg: boolean;
     };
-}): Promise<Terminal | null> {
+}): Promise<{log: string, value: any | null}> {
     ytdlpDownloadDestination = getYTDLPFilePath(ytdlpDownloadDestination);
 
     await linuxPatch(ytdlpDownloadDestination);
 
-    return await invokeInternal({
+    const terminal = await invokeInternal({
         ytdlpDownloadDestination,
         ffmpegDownloadDestination,
         args: getArgs(args),
         downloadBinary,
         valueSelector: downloadValueSelector,
     });
+
+    if (!terminal) {
+        return {
+            log: "Failed to create terminal instance",
+            value: null
+        };
+    }
+
+    let logs = "";
+    let lastValue: any = null;
+
+    for await (const text of terminal.listen()) {
+        logs += text + "\n";
+    }
+
+    return {
+        log: logs.trim(),
+        value: lastValue
+    };
 }
 
 /**
