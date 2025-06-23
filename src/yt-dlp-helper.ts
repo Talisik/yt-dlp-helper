@@ -268,11 +268,14 @@ function downloadValueSelector(text: string) {
     const progress = DOWNLOAD_PROGRESS_RE.exec(text);
 
     if (progress == null) {
-        return null;
+        return { data: { log: text, value: null } };
     }
 
     return {
-        data: JSON.parse(progress[1]),
+        data: {
+            log: text,
+            ...JSON.parse(progress[1])
+        }
     };
 }
 
@@ -288,7 +291,6 @@ function downloadValueSelector(text: string) {
  * @param {string} [options.ffmpegDownloadDestination='.'] - The path to the ffmpeg executable.
  * @param {boolean} [options.downloadBinary=true] - If true, download the executables if not present.
  *
- * @returns {Promise<{log: string, value: any | null}>} - A promise that resolves to logs and parsed values.
  */
 export async function download({
     args,
@@ -306,38 +308,20 @@ export async function download({
         ytdlp: boolean;
         ffmpeg: boolean;
     };
-}): Promise<{log: string, value: any | null}> {
+}): Promise<Terminal | null> {
     ytdlpDownloadDestination = getYTDLPFilePath(ytdlpDownloadDestination);
 
     await linuxPatch(ytdlpDownloadDestination);
 
-    const terminal = await invokeInternal({
+    return await invokeInternal({
         ytdlpDownloadDestination,
         ffmpegDownloadDestination,
         args: getArgs(args),
         downloadBinary,
         valueSelector: downloadValueSelector,
     });
-
-    if (!terminal) {
-        return {
-            log: "Failed to create terminal instance",
-            value: null
-        };
-    }
-
-    let logs = "";
-    let lastValue: any = null;
-
-    for await (const text of terminal.listen()) {
-        logs += text + "\n";
-    }
-
-    return {
-        log: logs.trim(),
-        value: lastValue
-    };
 }
+
 
 /**
  * Invokes the yt-dlp executable with the given arguments.
