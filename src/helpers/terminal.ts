@@ -105,13 +105,25 @@ export class Terminal {
 
         Terminal.#all[this.#id] = this;
 
+        // Capture both stdout and stderr
         if (process.stdout)
-            process.stdout.on('data', this.#data.push);
+            process.stdout.on('data', (data) => this.#data.push(data));
+        
+        if (process.stderr)
+            process.stderr.on('data', (data) => this.#data.push(data));
 
         process.on('close', (code, signal) => {
             this.#running = false;
             this.#exitCode = code;
             this.#exitSignal = signal;
+
+            // Log exit information for debugging
+            if (Config.log) {
+                console.debug(`Process '${this.#id}' exited with code: ${code}, signal: ${signal}`);
+                if (code !== 0) {
+                    console.error(`Process '${this.#id}' failed with exit code: ${code}`);
+                }
+            }
 
             delete Terminal.#all[this.#id];
         });
@@ -150,16 +162,16 @@ export class Terminal {
     async *#listen() {
         let i = 0;
 
-        while (i < this.#data.length) {
-            yield Buffer.from(this.#data[i++]).toString(
-                'utf-8'
-            );
-        }
-
-        if (!this.#process.stdout) return;
-
-        for await (const bytes of this.#process.stdout) {
-            yield Buffer.from(bytes).toString('utf-8');
+        while (this.#running || i < this.#data.length) {
+            // Yield any new data that has been captured
+            while (i < this.#data.length) {
+                yield Buffer.from(this.#data[i++]).toString('utf-8');
+            }
+            
+            // If process is still running, wait a bit for more data
+            if (this.#running) {
+                await new Promise(resolve => setTimeout(resolve, 10));
+            }
         }
     }
 
@@ -281,7 +293,7 @@ export class Terminal {
                     args,
                     {
                         windowsHide: true,
-                        stdio: ['ignore', 'pipe', 'ignore'],
+                        stdio: ['ignore', 'pipe', 'pipe'], // First pipe is for stdout, second pipe is for stderr
                     }
                 );
 
@@ -292,11 +304,8 @@ export class Terminal {
                 let error: any = null;
 
                 process.once('error', (e) => (error = e));
-                process.stdout.once(
-                    'error',
-                    (e) => (error = e)
-                );
-
+                process.stdout.once('error', (e) => (error = e));
+                process.stderr.once('error', (e) => (error = e));
                 await new Promise((resolve, reject) => {
                     if (error != null) {
                         reject(error);
@@ -305,7 +314,7 @@ export class Terminal {
 
                     process.once('error', reject);
                     process.stdout.once('error', reject);
-
+                    process.stderr.once('error', reject);
                     setTimeout(resolve, intermissionMS);
                 });
 
