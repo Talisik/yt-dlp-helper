@@ -24,7 +24,7 @@ export async function downloadFFmpeg({
 
     return await new Promise((resolve) => {
         ffbinaries.downloadBinaries(
-            ['ffmpeg'],
+            ['ffmpeg', 'ffprobe'],
             {
                 destination,
             },
