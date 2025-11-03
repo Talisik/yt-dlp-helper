@@ -40,4 +40,9 @@ export interface Args {
      * e.g. "50K" or "4.2M"
      */
     limitRate?: string;
+
+    /**
+     * The cookies from the browser to be used for the download.
+     */
+    cookiesFromBrowser?: string;
 }

@@ -17,6 +17,7 @@ export function getArgs({
   audioQuality,
   remuxVideo,
   limitRate,
+  cookiesFromBrowser,
 }: Args): string[] {
   const args = [url, ...BASE_ARGS];
 
@@ -42,6 +43,10 @@ export function getArgs({
 
   if (limitRate) {
     args.push("-r", limitRate);
+  }
+
+  if (cookiesFromBrowser) {
+    args.push("--cookies-from-browser", cookiesFromBrowser);
   }
 
   return args;
