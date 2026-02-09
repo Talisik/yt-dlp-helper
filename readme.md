@@ -343,6 +343,27 @@ import * as YTDLP from "yt-dlp-helper";
 })();
 ```
 
+#### Metadata options (TikTok and similar sites)
+
+Some sites (e.g. TikTok) may block or restrict metadata requests. You can pass browser cookies and an optional user-agent to improve success:
+
+```js
+import * as YTDLP from "yt-dlp-helper";
+
+(async () => {
+    const info = await YTDLP.getInfo("https://www.tiktok.com/@user/video/1234567890", {
+        cookiesFromBrowser: "chrome", // or "firefox", "edge", etc.
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ...", // optional
+    });
+
+    if (info.ok) {
+        console.log(info.data);
+    }
+})();
+```
+
+Ensure yt-dlp is up to date (e.g. use `downloadYTDLP({ forceDownload: true })` or ship a recent binary); TikTok's extractor changes frequently.
+
 Sample Result:
 
 ```json
@@ -455,6 +476,8 @@ import * as YTDLP from "yt-dlp-helper";
     console.log(info);
 })();
 ```
+
+For TikTok or other restricted sites, pass `cookiesFromBrowser` and optionally `userAgent` in the same options object.
 
 Sample Result:
 

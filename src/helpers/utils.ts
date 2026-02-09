@@ -1,7 +1,22 @@
 import * as os from "os";
 import { Terminal } from "./terminal.js";
 import { BASE_ARGS } from "./constants.js";
-import { Args } from "../interfaces/args.js";
+import { Args, MetadataOptions } from "../interfaces/args.js";
+
+/**
+ * Builds the argument prefix for metadata requests (getInfo, getPlaylistInfo).
+ * Used for sites like TikTok that may require cookies or a specific user-agent.
+ */
+export function getMetadataArgs(options?: MetadataOptions | null): string[] {
+    const args: string[] = [];
+    if (options?.cookiesFromBrowser) {
+        args.push("--cookies-from-browser", options.cookiesFromBrowser);
+    }
+    if (options?.userAgent) {
+        args.push("--user-agent", options.userAgent);
+    }
+    return args;
+}
 
 /**
  * Constructs the arguments array for the yt-dlp executable based on the given Args object.
