@@ -46,3 +46,20 @@ export interface Args {
      */
     cookiesFromBrowser?: string;
 }
+
+/**
+ * Options for metadata fetch operations (getInfo, getPlaylistInfo).
+ * Useful for sites like TikTok that may require cookies or a specific user-agent.
+ */
+export interface MetadataOptions {
+    /**
+     * Browser to extract cookies from (e.g. "chrome", "firefox").
+     * Passed to yt-dlp as --cookies-from-browser.
+     */
+    cookiesFromBrowser?: string;
+    /**
+     * Custom User-Agent string for the request.
+     * Passed to yt-dlp as --user-agent.
+     */
+    userAgent?: string;
+}

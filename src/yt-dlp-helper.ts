@@ -2,13 +2,13 @@ import {
     DOWNLOAD_PROGRESS_RE,
     ALREADY_DOWNLOADED_RE,
 } from "./helpers/constants.js";
-import { getArgs, linuxPatch } from "./helpers/utils.js";
+import { getArgs, getMetadataArgs, linuxPatch } from "./helpers/utils.js";
 import {
     downloadFFmpeg,
     getFFmpegLocation,
 } from "./helpers/ffmpeg-downloader.js";
 import { Terminal } from "./helpers/terminal.js";
-import { Args } from "./interfaces/args.js";
+import { Args, MetadataOptions } from "./interfaces/args.js";
 import {
     downloadYTDLP,
     getYTDLPFilePath,
@@ -84,16 +84,27 @@ async function invokeInternal({
  * If the executable is not present, it will be downloaded if the downloadBinary
  * option is set to true.
  *
+ * For sites like TikTok that restrict scraping, pass cookiesFromBrowser (e.g. "chrome")
+ * and optionally userAgent in options to improve metadata fetch success.
+ *
  * @param {string} url - The url of the video to get information about.
+ * @param {MetadataOptions} [options] - Optional cookies/user-agent for sites that require them (e.g. TikTok).
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise that resolves with an object
  * indicating whether the operation was successful and the video information.
  */
 export async function getInfo(
-    url: string
+    url: string,
+    options?: MetadataOptions
 ): Promise<{ ok: boolean; data?: any }> {
+    const args = [
+        ...getMetadataArgs(options),
+        "--no-warnings",
+        "--dump-json",
+        url,
+    ];
     const { data, ok } = await invoke({
-        args: [url, "--no-warnings", "--dump-json"],
+        args,
     });
 
     if (!ok)
@@ -194,6 +205,7 @@ export async function getLatestYTDLPVersionFromGitHub(): Promise<{
  * @param {string} [options.ytdlpDownloadDestination] - The path to the yt-dlp executable.
  * @param {string} [options.ffmpegDownloadDestination] - The path to the ffmpeg executable.
  * @param {boolean} [options.downloadBinary=true] - Whether to download the yt-dlp executable if it's missing.
+ * @param {MetadataOptions} [options.metadataOptions] - Optional cookies/user-agent for sites that require them (e.g. TikTok).
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise resolving to an object indicating success and the retrieved playlist data or failure.
  */
@@ -205,6 +217,8 @@ export async function getPlaylistInfo({
         ytdlp: false,
         ffmpeg: true,
     },
+    cookiesFromBrowser,
+    userAgent,
 }: {
     url: string;
     ytdlpDownloadDestination?: string;
@@ -213,15 +227,22 @@ export async function getPlaylistInfo({
         ytdlp: boolean;
         ffmpeg: boolean;
     };
+    cookiesFromBrowser?: string;
+    userAgent?: string;
 }): Promise<{ ok: boolean; data?: any }> {
     ytdlpDownloadDestination = getYTDLPFilePath(ytdlpDownloadDestination);
 
     await linuxPatch(ytdlpDownloadDestination);
 
+    const metadataArgs = getMetadataArgs(
+        cookiesFromBrowser != null || userAgent != null
+            ? { cookiesFromBrowser, userAgent }
+            : undefined
+    );
     const terminal = await invokeInternal({
         ytdlpDownloadDestination,
         ffmpegDownloadDestination,
-        args: ["--flat-playlist", "-J", url],
+        args: [...metadataArgs, "--flat-playlist", "-J", url],
         downloadBinary,
     });
 

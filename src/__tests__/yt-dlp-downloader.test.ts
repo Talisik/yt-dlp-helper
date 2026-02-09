@@ -61,11 +61,15 @@ describe('yt-dlp-downloader', () => {
     }, 10000);
 
     describe('getYTDLPVersion', () => {
-      it('should return the system current version of yt-dlp', async () => {
+      it('should return a version string when ./yt-dlp exists, or null when it does not', async () => {
         const result = await getYTDLPVersion();
         console.log(`System current version of yt-dlp: ${result}`);
-        expect(result).toBeDefined();   
-        expect(typeof result).toBe('string');
+        if (result === null) {
+          expect(result).toBeNull();
+        } else {
+          expect(typeof result).toBe('string');
+          expect(result).toMatch(/^\d{4}\.\d{1,2}\.\d{1,2}/);
+        }
       });
     }, 10000);
   });

@@ -134,3 +134,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# yt-dlp-helper downloaded binaries (re-downloaded at runtime if needed)
+ffmpeg
+ffprobe
+yt-dlp
+yt-dlp.exe
