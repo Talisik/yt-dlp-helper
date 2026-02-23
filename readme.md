@@ -343,9 +343,9 @@ import * as YTDLP from "yt-dlp-helper";
 })();
 ```
 
-#### Metadata options (TikTok and similar sites)
+#### Metadata options (TikTok, YouTube “made for kids”, and similar)
 
-Some sites (e.g. TikTok) may block or restrict metadata requests. You can pass browser cookies and an optional user-agent to improve success:
+Some sites block or restrict metadata unless the request looks like a real browser. Examples: TikTok, and YouTube videos marked “made for kids” (e.g. CoComelon, Disney Jr). Pass browser cookies and an optional user-agent to improve success:
 
 ```js
 import * as YTDLP from "yt-dlp-helper";
@@ -362,7 +362,7 @@ import * as YTDLP from "yt-dlp-helper";
 })();
 ```
 
-Ensure yt-dlp is up to date (e.g. use `downloadYTDLP({ forceDownload: true })` or ship a recent binary); TikTok's extractor changes frequently.
+Use the same options for YouTube “made for kids” links if you see “Metadata not found” (e.g. `getInfo(youtubeUrl, { cookiesFromBrowser: "chrome" })`). Keep yt-dlp up to date (e.g. `downloadYTDLP({ forceDownload: true })` or ship a recent binary); extractors for TikTok and YouTube change frequently.
 
 Sample Result:
 
@@ -477,7 +477,7 @@ import * as YTDLP from "yt-dlp-helper";
 })();
 ```
 
-For TikTok or other restricted sites, pass `cookiesFromBrowser` and optionally `userAgent` in the same options object.
+For TikTok, YouTube “made for kids”, or other restricted sites, pass `cookiesFromBrowser` and optionally `userAgent` in the same options object.
 
 Sample Result:
 

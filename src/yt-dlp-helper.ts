@@ -1,8 +1,10 @@
+import * as fs from "fs";
 import {
     DOWNLOAD_PROGRESS_RE,
     ALREADY_DOWNLOADED_RE,
+    YT_DLP_FILE_NAME,
 } from "./helpers/constants.js";
-import { getArgs, getMetadataArgs, linuxPatch } from "./helpers/utils.js";
+import { getArgs, getDefaultMetadataOptionsForUrl, getMetadataArgs, linuxPatch } from "./helpers/utils.js";
 import {
     downloadFFmpeg,
     getFFmpegLocation,
@@ -69,8 +71,14 @@ async function invokeInternal({
 
     if (ffmpegPath) args = ["--ffmpeg-location", ffmpegPath, ...args];
 
+    let command = ytdlpDownloadDestination;
+    const defaultPath = getYTDLPFilePath(undefined);
+    if (command === defaultPath && !fs.existsSync(command)) {
+        command = YT_DLP_FILE_NAME;
+    }
+
     return await Terminal.new({
-        command: ytdlpDownloadDestination,
+        command,
         args,
         valueSelector,
     });
@@ -84,11 +92,12 @@ async function invokeInternal({
  * If the executable is not present, it will be downloaded if the downloadBinary
  * option is set to true.
  *
- * For sites like TikTok that restrict scraping, pass cookiesFromBrowser (e.g. "chrome")
- * and optionally userAgent in options to improve metadata fetch success.
+ * For YouTube and TikTok URLs, cookies from Chrome are used by default when
+ * options are not provided, to reduce "sign in to confirm you're not a bot" and
+ * 403 errors. Pass options to override (e.g. a different browser or userAgent).
  *
  * @param {string} url - The url of the video to get information about.
- * @param {MetadataOptions} [options] - Optional cookies/user-agent for sites that require them (e.g. TikTok).
+ * @param {MetadataOptions} [options] - Optional cookies/user-agent; overrides defaults for YouTube/TikTok.
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise that resolves with an object
  * indicating whether the operation was successful and the video information.
@@ -97,8 +106,11 @@ export async function getInfo(
     url: string,
     options?: MetadataOptions
 ): Promise<{ ok: boolean; data?: any }> {
+    const defaultOpts = getDefaultMetadataOptionsForUrl(url);
+    const effectiveOptions =
+        defaultOpts != null ? { ...defaultOpts, ...options } : options;
     const args = [
-        ...getMetadataArgs(options),
+        ...getMetadataArgs(effectiveOptions),
         "--no-warnings",
         "--dump-json",
         url,
@@ -112,10 +124,14 @@ export async function getInfo(
             ok: false,
         };
 
-    return {
-        ok,
-        data: JSON.parse(data || ""),
-    };
+    try {
+        return {
+            ok,
+            data: JSON.parse(data || ""),
+        };
+    } catch {
+        return { ok: false };
+    }
 }
 
 /**

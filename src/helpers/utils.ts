@@ -4,6 +4,33 @@ import { BASE_ARGS } from "./constants.js";
 import { Args, MetadataOptions } from "../interfaces/args.js";
 
 /**
+ * Hostnames that often require browser cookies for metadata (e.g. bot checks).
+ */
+const METADATA_COOKIE_HOSTS = new Set([
+    "youtube.com",
+    "www.youtube.com",
+    "m.youtube.com",
+    "tiktok.com",
+    "www.tiktok.com",
+]);
+
+/**
+ * Returns default metadata options for URLs that typically need cookies (YouTube, TikTok).
+ * Caller can override by passing their own options to getInfo/getPlaylistInfo.
+ */
+export function getDefaultMetadataOptionsForUrl(url: string): MetadataOptions | undefined {
+    try {
+        const hostname = new URL(url).hostname.toLowerCase();
+        if (METADATA_COOKIE_HOSTS.has(hostname)) {
+            return { cookiesFromBrowser: "chrome" };
+        }
+    } catch {
+        // invalid URL
+    }
+    return undefined;
+}
+
+/**
  * Builds the argument prefix for metadata requests (getInfo, getPlaylistInfo).
  * Used for sites like TikTok that may require cookies or a specific user-agent.
  */
