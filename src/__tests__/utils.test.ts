@@ -1,7 +1,46 @@
 import { describe, it, expect } from "vitest";
-import { getMetadataArgs } from "../helpers/utils.js";
+import {
+    getDefaultMetadataOptionsForUrl,
+    getMetadataArgs,
+} from "../helpers/utils.js";
 
 describe("utils", () => {
+    describe("getDefaultMetadataOptionsForUrl", () => {
+        it("returns chrome cookies for youtube.com URLs", () => {
+            expect(
+                getDefaultMetadataOptionsForUrl(
+                    "https://www.youtube.com/watch?v=abc"
+                )
+            ).toEqual({ cookiesFromBrowser: "chrome" });
+        });
+
+        it("returns chrome cookies for m.youtube.com URLs", () => {
+            expect(
+                getDefaultMetadataOptionsForUrl(
+                    "https://m.youtube.com/watch?v=abc"
+                )
+            ).toEqual({ cookiesFromBrowser: "chrome" });
+        });
+
+        it("returns chrome cookies for tiktok.com URLs", () => {
+            expect(
+                getDefaultMetadataOptionsForUrl(
+                    "https://www.tiktok.com/@user/video/123"
+                )
+            ).toEqual({ cookiesFromBrowser: "chrome" });
+        });
+
+        it("returns undefined for non-YouTube/TikTok URLs", () => {
+            expect(
+                getDefaultMetadataOptionsForUrl("https://example.com/video")
+            ).toBeUndefined();
+        });
+
+        it("returns undefined for invalid URL", () => {
+            expect(getDefaultMetadataOptionsForUrl("not-a-url")).toBeUndefined();
+        });
+    });
+
     describe("getMetadataArgs", () => {
         it("returns empty array when no options provided", () => {
             expect(getMetadataArgs()).toEqual([]);

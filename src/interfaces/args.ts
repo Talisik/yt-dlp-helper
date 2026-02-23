@@ -49,7 +49,8 @@ export interface Args {
 
 /**
  * Options for metadata fetch operations (getInfo, getPlaylistInfo).
- * Useful for sites like TikTok that may require cookies or a specific user-agent.
+ * Useful for sites that require cookies or a specific user-agent (e.g. TikTok,
+ * YouTube "made for kids" or other restricted content).
  */
 export interface MetadataOptions {
     /**

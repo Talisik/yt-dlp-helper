@@ -1,17 +1,27 @@
 {
     "name": "yt-dlp-helper",
     "version": "1.1.0",
-    "main": "dist/index.js",
+    "main": "dist/index.cjs",
+    "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "files": [
         "dist"
     ],
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "require": "./dist/index.cjs",
+            "import": "./dist/index.js"
+        }
+    },
     "type": "module",
     "scripts": {
-        "build": "tsc",
+        "build": "tsup src/index.ts --format cjs,esm && tsc --emitDeclarationOnly",
+        "build:legacy": "tsc",
         "test": "vitest",
         "test:run": "vitest run",
         "test:ui": "vitest --ui",
+        "test:getinfo-youtube": "node scripts/test-getinfo-youtube.js",
         "prepare": "npm run build"
     },
     "keywords": [
