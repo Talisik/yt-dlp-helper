@@ -6,31 +6,34 @@ import {
 
 describe("utils", () => {
     describe("getDefaultMetadataOptionsForUrl", () => {
-        it("returns chrome cookies for youtube.com URLs", () => {
+        it("returns undefined for youtube.com URLs (no default; app passes options when needed)", () => {
             expect(
                 getDefaultMetadataOptionsForUrl(
                     "https://www.youtube.com/watch?v=abc"
                 )
-            ).toEqual({ cookiesFromBrowser: "chrome" });
+            ).toBeUndefined();
         });
 
-        it("returns chrome cookies for m.youtube.com URLs", () => {
+        it("returns undefined for m.youtube.com URLs", () => {
             expect(
                 getDefaultMetadataOptionsForUrl(
                     "https://m.youtube.com/watch?v=abc"
                 )
-            ).toEqual({ cookiesFromBrowser: "chrome" });
+            ).toBeUndefined();
         });
 
-        it("returns chrome cookies for tiktok.com URLs", () => {
-            expect(
-                getDefaultMetadataOptionsForUrl(
-                    "https://www.tiktok.com/@user/video/123"
-                )
-            ).toEqual({ cookiesFromBrowser: "chrome" });
+        it("returns platform-aware browser cookies for tiktok.com URLs (chromium on Linux, chrome elsewhere)", () => {
+            const result = getDefaultMetadataOptionsForUrl(
+                "https://www.tiktok.com/@user/video/123"
+            );
+            const expectedBrowser =
+                process.platform === "linux" ? "chromium" : "chrome";
+            expect(result).toEqual({
+                cookiesFromBrowser: expectedBrowser,
+            });
         });
 
-        it("returns undefined for non-YouTube/TikTok URLs", () => {
+        it("returns undefined for non-TikTok URLs", () => {
             expect(
                 getDefaultMetadataOptionsForUrl("https://example.com/video")
             ).toBeUndefined();

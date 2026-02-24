@@ -4,25 +4,37 @@ import { BASE_ARGS } from "./constants.js";
 import { Args, MetadataOptions } from "../interfaces/args.js";
 
 /**
- * Hostnames that often require browser cookies for metadata (e.g. bot checks).
+ * Hostnames that get default browser cookies when no options are passed.
+ * Only TikTok is included: normal YouTube usually works without cookies; adding
+ * Chrome by default for YouTube broke getInfo when Chrome isn't available (e.g.
+ * in some Electron environments). For YouTube "made for kids" or bot checks,
+ * the app should pass options (e.g. cookiesFromBrowser: "chrome") explicitly.
  */
 const METADATA_COOKIE_HOSTS = new Set([
-    "youtube.com",
-    "www.youtube.com",
-    "m.youtube.com",
     "tiktok.com",
     "www.tiktok.com",
 ]);
 
 /**
- * Returns default metadata options for URLs that typically need cookies (YouTube, TikTok).
+ * Default browser for TikTok cookie extraction, by platform.
+ * Linux often has Chromium or Firefox but not Chrome; Windows typically has Chrome.
+ */
+function getDefaultBrowserForTikTok(): string {
+    return os.platform() === "linux" ? "chromium" : "chrome";
+}
+
+/**
+ * Returns default metadata options for URLs that typically need cookies (TikTok).
+ * Browser is platform-aware: Linux uses "chromium", Windows/darwin use "chrome",
+ * so getInfo doesn't assume Chrome on systems where it isn't installed.
  * Caller can override by passing their own options to getInfo/getPlaylistInfo.
+ * YouTube is not included so normal YouTube keeps working without cookies.
  */
 export function getDefaultMetadataOptionsForUrl(url: string): MetadataOptions | undefined {
     try {
         const hostname = new URL(url).hostname.toLowerCase();
         if (METADATA_COOKIE_HOSTS.has(hostname)) {
-            return { cookiesFromBrowser: "chrome" };
+            return { cookiesFromBrowser: getDefaultBrowserForTikTok() };
         }
     } catch {
         // invalid URL
