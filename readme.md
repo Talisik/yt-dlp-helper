@@ -345,7 +345,7 @@ import * as YTDLP from "yt-dlp-helper";
 
 #### Metadata options (TikTok, YouTube “made for kids”, and similar)
 
-Some sites block or restrict metadata unless the request looks like a real browser. Examples: TikTok, and YouTube videos marked “made for kids” (e.g. CoComelon, Disney Jr). Pass browser cookies and an optional user-agent to improve success:
+Some sites block or restrict metadata unless the request looks like a real browser. Examples: TikTok, and YouTube videos marked “made for kids” (e.g. CoComelon, Disney Jr). You can pass `cookiesFromBrowser` (and optionally `userAgent`) for **any URL**, including YouTube—e.g. when YouTube returns "This video is not available" or when a session is required. The helper passes them through to yt-dlp:
 
 ```js
 import * as YTDLP from "yt-dlp-helper";

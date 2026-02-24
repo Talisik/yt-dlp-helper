@@ -4,7 +4,12 @@ import {
     ALREADY_DOWNLOADED_RE,
     YT_DLP_FILE_NAME,
 } from "./helpers/constants.js";
-import { getArgs, getDefaultMetadataOptionsForUrl, getMetadataArgs, linuxPatch } from "./helpers/utils.js";
+import {
+    getArgs,
+    getDefaultMetadataOptionsForUrl,
+    getMetadataArgs,
+    linuxPatch,
+} from "./helpers/utils.js";
 import {
     downloadFFmpeg,
     getFFmpegLocation,
@@ -92,12 +97,15 @@ async function invokeInternal({
  * If the executable is not present, it will be downloaded if the downloadBinary
  * option is set to true.
  *
- * For YouTube and TikTok URLs, cookies from Chrome are used by default when
- * options are not provided, to reduce "sign in to confirm you're not a bot" and
- * 403 errors. Pass options to override (e.g. a different browser or userAgent).
+ * For TikTok URLs, cookies from a browser are used by default when options are not
+ * provided (Linux: chromium, Windows/darwin: chrome). For YouTube, pass options
+ * explicitly when needed (e.g. "made for kids" or bot checks); normal YouTube works
+ * without cookies.
  *
  * @param {string} url - The url of the video to get information about.
- * @param {MetadataOptions} [options] - Optional cookies/user-agent; overrides defaults for YouTube/TikTok.
+ * @param {MetadataOptions} [options] - Optional cookies/user-agent; overrides defaults for TikTok.
+ *   Pass cookiesFromBrowser (e.g. "firefox") for any URL when needed (e.g. YouTube "made for kids"
+ *   or "This video is not available"); the helper passes it through to yt-dlp.
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise that resolves with an object
  * indicating whether the operation was successful and the video information.
@@ -221,7 +229,7 @@ export async function getLatestYTDLPVersionFromGitHub(): Promise<{
  * @param {string} [options.ytdlpDownloadDestination] - The path to the yt-dlp executable.
  * @param {string} [options.ffmpegDownloadDestination] - The path to the ffmpeg executable.
  * @param {boolean} [options.downloadBinary=true] - Whether to download the yt-dlp executable if it's missing.
- * @param {MetadataOptions} [options.metadataOptions] - Optional cookies/user-agent for sites that require them (e.g. TikTok).
+ * @param {MetadataOptions} [options.metadataOptions] - Optional cookies/user-agent; same behavior as getInfo (TikTok gets platform default when not passed; pass for any URL including YouTube when needed).
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise resolving to an object indicating success and the retrieved playlist data or failure.
  */
@@ -250,11 +258,14 @@ export async function getPlaylistInfo({
 
     await linuxPatch(ytdlpDownloadDestination);
 
-    const metadataArgs = getMetadataArgs(
+    const defaultOpts = getDefaultMetadataOptionsForUrl(url);
+    const appOpts =
         cookiesFromBrowser != null || userAgent != null
             ? { cookiesFromBrowser, userAgent }
-            : undefined
-    );
+            : undefined;
+    const effectiveOptions =
+        defaultOpts != null ? { ...defaultOpts, ...appOpts } : appOpts;
+    const metadataArgs = getMetadataArgs(effectiveOptions);
     const terminal = await invokeInternal({
         ytdlpDownloadDestination,
         ffmpegDownloadDestination,
