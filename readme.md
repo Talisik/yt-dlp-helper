@@ -345,7 +345,7 @@ import * as YTDLP from "yt-dlp-helper";
 
 #### Metadata options (TikTok, YouTube “made for kids”, and similar)
 
-Some sites block or restrict metadata unless the request looks like a real browser. Examples: TikTok, and YouTube videos marked “made for kids” (e.g. CoComelon, Disney Jr). You can pass `cookiesFromBrowser` (and optionally `userAgent`) for **any URL**, including YouTube—e.g. when YouTube returns "This video is not available" or when a session is required. The helper passes them through to yt-dlp:
+Some sites block or restrict metadata unless the request looks like a real browser. Examples: TikTok, and YouTube videos marked “made for kids” (e.g. CoComelon, Disney Jr). For **TikTok** and **YouTube** (youtube.com, www.youtube.com, youtu.be), the helper automatically uses cookies from the first installed browser (Chrome, Chromium, Firefox, Edge, Brave, Opera, Vivaldi) when you do not pass `cookiesFromBrowser`; you can still pass it to override. (For YouTube, cookies are only added when a browser is detected; if none is found, requests run without cookies.) For any URL, you can pass `cookiesFromBrowser` (and optionally `userAgent`)—e.g. when you see “This video is not available”. The helper passes them through to yt-dlp:
 
 ```js
 import * as YTDLP from "yt-dlp-helper";
@@ -362,7 +362,7 @@ import * as YTDLP from "yt-dlp-helper";
 })();
 ```
 
-Use the same options for YouTube “made for kids” links if you see “Metadata not found” (e.g. `getInfo(youtubeUrl, { cookiesFromBrowser: "chrome" })`). Keep yt-dlp up to date (e.g. `downloadYTDLP({ forceDownload: true })` or ship a recent binary); extractors for TikTok and YouTube change frequently.
+If auto-detection is not enough (e.g. no browser found or you need a specific one), pass `cookiesFromBrowser` explicitly (e.g. `getInfo(youtubeUrl, { cookiesFromBrowser: "chrome" })`). Keep yt-dlp up to date (e.g. `downloadYTDLP({ forceDownload: true })` or ship a recent binary); extractors for TikTok and YouTube change frequently.
 
 Sample Result:
 
@@ -477,7 +477,7 @@ import * as YTDLP from "yt-dlp-helper";
 })();
 ```
 
-For TikTok, YouTube “made for kids”, or other restricted sites, pass `cookiesFromBrowser` and optionally `userAgent` in the same options object.
+For TikTok, YouTube (“made for kids” or other restricted), or other sites, pass `cookiesFromBrowser` and optionally `userAgent` in the same options object to override the auto-detected browser.
 
 Sample Result:
 
