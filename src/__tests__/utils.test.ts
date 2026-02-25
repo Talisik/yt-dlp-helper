@@ -1,12 +1,22 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
     getDefaultMetadataOptionsForUrl,
     getMetadataArgs,
 } from "../helpers/utils.js";
+import { detectFirstInstalledBrowser } from "../helpers/browser-detect.js";
+
+vi.mock("../helpers/browser-detect.js", () => ({
+    detectFirstInstalledBrowser: vi.fn(),
+}));
 
 describe("utils", () => {
+    beforeEach(() => {
+        vi.mocked(detectFirstInstalledBrowser).mockReturnValue(null);
+    });
+
     describe("getDefaultMetadataOptionsForUrl", () => {
-        it("returns undefined for youtube.com URLs (no default; app passes options when needed)", () => {
+        it("returns undefined for youtube.com when no browser detected", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue(null);
             expect(
                 getDefaultMetadataOptionsForUrl(
                     "https://www.youtube.com/watch?v=abc"
@@ -14,7 +24,40 @@ describe("utils", () => {
             ).toBeUndefined();
         });
 
-        it("returns undefined for m.youtube.com URLs", () => {
+        it("returns detected browser for youtube.com when one is installed", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue("chrome");
+            expect(
+                getDefaultMetadataOptionsForUrl(
+                    "https://www.youtube.com/watch?v=abc"
+                )
+            ).toEqual({ cookiesFromBrowser: "chrome" });
+        });
+
+        it("returns detected browser for youtube.com (no www) when one is installed", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue("firefox");
+            expect(
+                getDefaultMetadataOptionsForUrl(
+                    "https://youtube.com/watch?v=abc"
+                )
+            ).toEqual({ cookiesFromBrowser: "firefox" });
+        });
+
+        it("returns detected browser for youtu.be when one is installed", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue("edge");
+            expect(
+                getDefaultMetadataOptionsForUrl("https://youtu.be/abc")
+            ).toEqual({ cookiesFromBrowser: "edge" });
+        });
+
+        it("returns undefined for youtu.be when no browser detected", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue(null);
+            expect(
+                getDefaultMetadataOptionsForUrl("https://youtu.be/abc")
+            ).toBeUndefined();
+        });
+
+        it("returns undefined for m.youtube.com (not in optional list)", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue("chrome");
             expect(
                 getDefaultMetadataOptionsForUrl(
                     "https://m.youtube.com/watch?v=abc"
@@ -22,7 +65,8 @@ describe("utils", () => {
             ).toBeUndefined();
         });
 
-        it("returns platform-aware browser cookies for tiktok.com URLs (chromium on Linux, chrome elsewhere)", () => {
+        it("returns platform fallback for tiktok.com when no browser detected (chromium on Linux, chrome elsewhere)", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue(null);
             const result = getDefaultMetadataOptionsForUrl(
                 "https://www.tiktok.com/@user/video/123"
             );
@@ -30,6 +74,16 @@ describe("utils", () => {
                 process.platform === "linux" ? "chromium" : "chrome";
             expect(result).toEqual({
                 cookiesFromBrowser: expectedBrowser,
+            });
+        });
+
+        it("returns first detected browser for tiktok.com when one is installed", () => {
+            vi.mocked(detectFirstInstalledBrowser).mockReturnValue("firefox");
+            const result = getDefaultMetadataOptionsForUrl(
+                "https://www.tiktok.com/@user/video/123"
+            );
+            expect(result).toEqual({
+                cookiesFromBrowser: "firefox",
             });
         });
 

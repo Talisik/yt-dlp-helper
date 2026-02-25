@@ -97,13 +97,16 @@ async function invokeInternal({
  * If the executable is not present, it will be downloaded if the downloadBinary
  * option is set to true.
  *
- * For TikTok URLs, cookies from a browser are used by default when options are not
- * provided (Linux: chromium, Windows/darwin: chrome). For YouTube, pass options
+ * For TikTok and YouTube URLs, cookies from a browser are used by default when options
+ * are not provided: the helper auto-detects the first installed browser (chrome,
+ * chromium, firefox, edge, brave, opera, vivaldi). TikTok also falls back to
+ * chromium/chrome if none is found; YouTube uses cookies only when a browser is
+ * detected (no fallback). For other cases, pass options
  * explicitly when needed (e.g. "made for kids" or bot checks); normal YouTube works
  * without cookies.
  *
  * @param {string} url - The url of the video to get information about.
- * @param {MetadataOptions} [options] - Optional cookies/user-agent; overrides defaults for TikTok.
+ * @param {MetadataOptions} [options] - Optional cookies/user-agent; overrides defaults for TikTok/YouTube.
  *   Pass cookiesFromBrowser (e.g. "firefox") for any URL when needed (e.g. YouTube "made for kids"
  *   or "This video is not available"); the helper passes it through to yt-dlp.
  *
@@ -229,7 +232,7 @@ export async function getLatestYTDLPVersionFromGitHub(): Promise<{
  * @param {string} [options.ytdlpDownloadDestination] - The path to the yt-dlp executable.
  * @param {string} [options.ffmpegDownloadDestination] - The path to the ffmpeg executable.
  * @param {boolean} [options.downloadBinary=true] - Whether to download the yt-dlp executable if it's missing.
- * @param {MetadataOptions} [options.metadataOptions] - Optional cookies/user-agent; same behavior as getInfo (TikTok gets platform default when not passed; pass for any URL including YouTube when needed).
+ * @param {MetadataOptions} [options.metadataOptions] - Optional cookies/user-agent; same behavior as getInfo (TikTok/YouTube get auto-detected browser when not passed; pass for any URL when needed).
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise resolving to an object indicating success and the retrieved playlist data or failure.
  */
