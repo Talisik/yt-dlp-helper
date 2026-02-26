@@ -2,7 +2,10 @@ import * as os from "os";
 import { Terminal } from "./terminal.js";
 import { BASE_ARGS } from "./constants.js";
 import { Args, MetadataOptions } from "../interfaces/args.js";
-import { detectFirstInstalledBrowser } from "./browser-detect.js";
+import {
+    detectFirstInstalledBrowser,
+    getBrowserDetectionDebugInfo,
+} from "./browser-detect.js";
 
 /**
  * Hostnames that always get default browser cookies when no options are passed
@@ -55,6 +58,13 @@ export function getDefaultMetadataOptionsForUrl(url: string): MetadataOptions | 
             const browser = detectFirstInstalledBrowser();
             if (browser !== null) {
                 return { cookiesFromBrowser: browser };
+            }
+            if (process.env.YTDLP_HELPER_DEBUG_COOKIES === "1") {
+                const debug = getBrowserDetectionDebugInfo();
+                console.warn(
+                    "[yt-dlp-helper] No browser detected for optional cookie host (e.g. YouTube). Debug:",
+                    JSON.stringify(debug, null, 2),
+                );
             }
         }
     } catch {
