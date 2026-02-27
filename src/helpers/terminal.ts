@@ -185,9 +185,15 @@ export class Terminal {
      * @yields {any} Values from the process's stdout.
      */
     async *listen() {
+        let logBuffer = '';
         for await (const text of this.#listen()) {
-            if (Config.log)
-                console.debug(text.substring(0, 32));
+            if (Config.log) {
+                logBuffer += text;
+                const lines = logBuffer.split('\n');
+                logBuffer = lines.pop() ?? '';
+                for (const line of lines)
+                    if (line.length > 0) console.debug(line);
+            }
 
             if (this.#valueSelector) {
                 yield this.#valueSelector(text);
@@ -195,6 +201,8 @@ export class Terminal {
                 yield text;
             }
         }
+        if (Config.log && logBuffer.length > 0)
+            console.debug(logBuffer);
     }
 
     /**
