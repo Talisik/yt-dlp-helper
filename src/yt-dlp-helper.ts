@@ -130,7 +130,6 @@ export async function getInfo(
         "--dump-json",
         url,
     ];
-    console.debug(args);
     const { data, ok } = await invoke({
         args,
         ytdlpDownloadDestination,
