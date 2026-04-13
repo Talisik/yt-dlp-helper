@@ -1,55 +1,55 @@
 {
-    "name": "yt-dlp-helper",
-    "version": "1.1.0",
-    "main": "./dist/index.cjs",
-    "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
-    "files": [
-        "dist"
-    ],
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.js",
-            "require": "./dist/index.cjs",
-            "default": "./dist/index.js"
-        },
-        "./*": "./dist/*",
-        "./package.json": "./package.json"
+  "name": "yt-dlp-helper",
+  "version": "1.1.1",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js"
     },
-    "type": "module",
-    "scripts": {
-        "build": "tsup src/index.ts --format cjs,esm && tsc --emitDeclarationOnly",
-        "build:legacy": "tsc",
-        "test": "vitest",
-        "test:run": "vitest run",
-        "test:ui": "vitest --ui",
-        "test:getinfo-youtube": "node scripts/test-getinfo-youtube.js",
-        "prepare": "npm run build"
-    },
-    "keywords": [
-        "typescript",
-        "yt-dlp"
-    ],
-    "author": "Michael Edmund Wong",
-    "license": "ISC",
-    "description": "A TypeScript wrapper for yt-dlp that simplifies video downloading from YouTube and other supported platforms. Features include automatic binary installation, format selection, progress tracking, rate limiting, and detailed video metadata retrieval. Includes ffmpeg integration for audio/video conversion.",
-    "repository": {
-        "type": "git",
-        "url": "https://bitbucket.org/metawhale/yt-dlp-helper.git"
-    },
-    "devDependencies": {
-        "@types/ffbinaries": "^1.1.5",
-        "@types/node": "^22.10.1",
-        "@vitest/ui": "^3.2.2",
-        "ts-node": "^10.9.2",
-        "tsup": "^8.3.5",
-        "typescript": "^5.7.2",
-        "undici-types": "^7.0.0",
-        "vitest": "^3.2.2"
-    },
-    "dependencies": {
-        "ffbinaries": "^1.1.6",
-        "tree-kill": "^1.2.2"
-    }
+    "./*": "./dist/*",
+    "./package.json": "./package.json"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm && tsc --emitDeclarationOnly",
+    "build:legacy": "tsc",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:getinfo-youtube": "node scripts/test-getinfo-youtube.js",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "typescript",
+    "yt-dlp"
+  ],
+  "author": "Michael Edmund Wong",
+  "license": "ISC",
+  "description": "A TypeScript wrapper for yt-dlp that simplifies video downloading from YouTube and other supported platforms. Features include automatic binary installation, format selection, progress tracking, rate limiting, and detailed video metadata retrieval. Includes ffmpeg integration for audio/video conversion.",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/metawhale/yt-dlp-helper.git"
+  },
+  "devDependencies": {
+    "@types/ffbinaries": "^1.1.5",
+    "@types/node": "^22.10.1",
+    "@vitest/ui": "^3.2.2",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "undici-types": "^7.0.0",
+    "vitest": "^3.2.2"
+  },
+  "dependencies": {
+    "ffbinaries": "^1.1.6",
+    "tree-kill": "^1.2.2"
+  }
 }
