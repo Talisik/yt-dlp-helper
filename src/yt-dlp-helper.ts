@@ -109,13 +109,17 @@ async function invokeInternal({
  * @param {MetadataOptions} [options] - Optional cookies/user-agent; overrides defaults for TikTok/YouTube.
  *   Pass cookiesFromBrowser (e.g. "firefox") for any URL when needed (e.g. YouTube "made for kids"
  *   or "This video is not available"); the helper passes it through to yt-dlp.
+ * @param {string} [ytdlpDownloadDestination] - Optional path to the yt-dlp executable.
+ *   Defaults to the platform-specific binary in the current working directory, falling back
+ *   to `yt-dlp` on PATH.
  *
  * @returns {Promise<{ok: boolean, data: any}>} - A promise that resolves with an object
  * indicating whether the operation was successful and the video information.
  */
 export async function getInfo(
     url: string,
-    options?: MetadataOptions
+    options?: MetadataOptions,
+    ytdlpDownloadDestination?: string
 ): Promise<{ ok: boolean; data?: any }> {
     const defaultOpts = getDefaultMetadataOptionsForUrl(url);
     const effectiveOptions =
@@ -128,6 +132,7 @@ export async function getInfo(
     ];
     const { data, ok } = await invoke({
         args,
+        ytdlpDownloadDestination,
     });
 
     if (!ok)
